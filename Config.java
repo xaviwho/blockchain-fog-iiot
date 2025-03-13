@@ -1,0 +1,1 @@
+// Configuration parameters (Fog Nodes, Sensors, Blockchain)

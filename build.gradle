@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Web3j for Ethereum blockchain integration
+    implementation 'org.web3j:core:4.9.4'
+    
+    // JSON processing
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.0'
+    
+    // Apache Commons
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'commons-io:commons-io:2.11.0'
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.6'
+    implementation 'ch.qos.logback:logback-classic:1.4.5'
+    
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+}
+
+application {
+    mainClass = 'org.example.MainSimulation'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Task to run with fat jar
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'org.example.MainSimulation'
+    }
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}

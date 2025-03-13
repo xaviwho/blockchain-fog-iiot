@@ -1,0 +1,26 @@
+# Gradle
+.gradle/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Java
+*.class
+
+# Logs
+*.log
+
+# Node.js
+node_modules/
+
+# Hardhat
+cache/
+artifacts/
+
+# Environment variables
+.env
+
+# Large data files
+*.csv

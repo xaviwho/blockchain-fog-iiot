@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Factory Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        h1, h2 {
+            margin-top: 0;
+        }
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        .anomalies {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .anomaly-card {
+            background-color: #fff0f0;
+            border-left: 4px solid #ff5555;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .blockchain-card {
+            background-color: #f0f8ff;
+            border-left: 4px solid #5555ff;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+        .badge-warning {
+            background-color: #ffeeba;
+            color: #856404;
+        }
+        .badge-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .refresh-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Smart Factory Dashboard</h1>
+        <p>Blockchain-Integrated Fog Computing for Smart Factory Data Processing</p>
+    </div>
+    
+    <button class="refresh-button" onclick="refreshData()">Refresh Data</button>
+    
+    <div class="dashboard">
+        <div class="card">
+            <h2>Measurements</h2>
+            <div>
+                <label for="feature-select">Select Feature:</label>
+                <select id="feature-select" onchange="updateMeasurementChart()">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="chart-container">
+                <canvas id="measurementChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Anomalies</h2>
+            <div>
+                <label for="machine-select">Select Machine:</label>
+                <select id="machine-select" onchange="updateAnomalies()">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="anomalies" id="anomalies-container">
+                <!-- Anomalies will be populated dynamically -->
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Blockchain Transactions</h2>
+            <div class="blockchain-transactions" id="blockchain-container">
+                <!-- Transactions will be populated dynamically -->
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>System Performance</h2>
+            <div class="chart-container">
+                <canvas id="performanceChart"></canvas>
+            </div>
+            <div>
+                <table>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Data Points Processed</td>
+                        <td id="data-points-processed">0</td>
+                    </tr>
+                    <tr>
+                        <td>Processing Speed</td>
+                        <td id="processing-speed">0 points/sec</td>
+                    </tr>
+                    <tr>
+                        <td>Blockchain Transactions</td>
+                        <td id="blockchain-transactions">0</td>
+                    </tr>
+                    <tr>
+                        <td>Anomalies Detected</td>
+                        <td id="anomalies-detected">0</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize charts
+        let measurementChart = null;
+        let performanceChart = null;
+        let measurements = {};
+        let anomalies = {};
+        let blockchainTransactions = [];
+        
+        // Performance monitoring
+        let performanceData = {
+            labels: [],
+            processingSpeed: [],
+            anomalyRate: []
+        };
+        
+        // Initialize dashboard when page loads
+        window.onload = function() {
+            initCharts();
+            refreshData();
+            
+            // Refresh data every 10 seconds
+            setInterval(refreshData, 10000);
+        };
+        
+        function initCharts() {
+            // Measurement chart
+            const measurementCtx = document.getElementById('measurementChart').getContext('2d');
+            measurementChart = new Chart(measurementCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Actual',
+                            data: [],
+                            borderColor: 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Setpoint',
+                            data: [],
+                            borderColor: 'rgb(255, 99, 132)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+            
+            // Performance chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Processing Speed (points/sec)',
+                            data: [],
+                            borderColor: 'rgb(54, 162, 235)',
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Anomaly Rate (%)',
+                            data: [],
+                            borderColor: 'rgb(255, 99, 132)',
+                            tension: 0.1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Points/sec'
+                            }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Anomaly Rate (%)'
+                            },
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+        
+        function refreshData() {
+            console.log('Refreshing data...');
+            
+            // Fetch measurements
+            fetch('/api/measurements')
+                .then(response => response.json())
+                .then(data => {
+                    measurements = data;
+                    
+                    // Update feature select
+                    const featureSelect = document.getElementById('feature-select');
+                    featureSelect.innerHTML = '';
+                    
+                    for (const feature in measurements) {
+                        const option = document.createElement('option');
+                        option.value = feature;
+                        option.textContent = feature;
+                        featureSelect.appendChild(option);
+                    }
+                    
+                    // Update chart with first feature
+                    if (featureSelect.options.length > 0) {
+                        updateMeasurementChart();
+                    }
+                })
+                .catch(error => console.error('Error fetching measurements:', error));
+            
+            // Fetch anomalies
+            fetch('/api/anomalies')
+                .then(response => response.json())
+                .then(data => {
+                    anomalies = data;
+                    
+                    // Update machine select
+                    const machineSelect = document.getElementById('machine-select');
+                    machineSelect.innerHTML = '';
+                    
+                    for (const machine in anomalies) {
+                        const option = document.createElement('option');
+                        option.value = machine;
+                        option.textContent = machine;
+                        machineSelect.appendChild(option);
+                    }
+                    
+                    // Update anomalies with first machine
+                    if (machineSelect.options.length > 0) {
+                        updateAnomalies();
+                    }
+                    
+                    // Update anomaly count
+                    let totalAnomalies = 0;
+                    for (const machine in anomalies) {
+                        totalAnomalies += anomalies[machine].length;
+                    }
+                    document.getElementById('anomalies-detected').textContent = totalAnomalies;
+                })
+                .catch(error => console.error('Error fetching anomalies:', error));
+            
+            // Fetch blockchain transactions
+            fetch('/api/blockchain')
+                .then(response => response.json())
+                .then(data => {
+                    blockchainTransactions = data.transactions;
+                    
+                    // Update blockchain transactions
+                    updateBlockchainTransactions();
+                    
+                    // Update transaction count
+                    document.getElementById('blockchain-transactions').textContent = blockchainTransactions.length;
+                })
+                .catch(error => console.error('Error fetching blockchain transactions:', error));
+            
+            // Update performance metrics
+            updatePerformanceMetrics();
+        }
+        
+        function updateMeasurementChart() {
+            const featureSelect = document.getElementById('feature-select');
+            const feature = featureSelect.value;
+            
+            if (!feature || !measurements[feature]) return;
+            
+            const data = measurements[feature];
+            const timestamps = data.map(m => m.timestamp.split(' ')[1]); // Show only time part
+            const actuals = data.map(m => m.actual);
+            const setpoints = data.map(m => m.setpoint);
+            
+            // Update chart data
+            measurementChart.data.labels = timestamps;
+            measurementChart.data.datasets[0].data = actuals;
+            measurementChart.data.datasets[1].data = setpoints;
+            measurementChart.update();
+        }
+        
+        function updateAnomalies() {
+            const machineSelect = document.getElementById('machine-select');
+            const machine = machineSelect.value;
+            
+            if (!machine || !anomalies[machine]) return;
+            
+            const anomalyContainer = document.getElementById('anomalies-container');
+            anomalyContainer.innerHTML = '';
+            
+            const machineAnomalies = anomalies[machine];
+            machineAnomalies.forEach(anomaly => {
+                const anomalyCard = document.createElement('div');
+                anomalyCard.className = 'anomaly-card';
+                
+                const scoreClass = anomaly.score > 0.8 ? 'badge-danger' : 'badge-warning';
+                
+                anomalyCard.innerHTML = `
+                    <div>
+                        <span class="badge ${scoreClass}">Score: ${anomaly.score.toFixed(2)}</span>
+                        <span>${anomaly.timestamp}</span>
+                    </div>
+                    <div>
+                        <ul>
+                            ${anomaly.details.map(detail => `<li>${detail}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                anomalyContainer.appendChild(anomalyCard);
+            });
+        }
+        
+        function updateBlockchainTransactions() {
+            const blockchainContainer = document.getElementById('blockchain-container');
+            blockchainContainer.innerHTML = '';
+            
+            blockchainTransactions.forEach(tx => {
+                const txCard = document.createElement('div');
+                txCard.className = 'blockchain-card';
+                
+                txCard.innerHTML = `
+                    <div>
+                        <strong>Hash:</strong> ${tx.hash.substring(0, 10)}...
+                    </div>
+                    <div>
+                        <strong>Details:</strong> ${tx.details}
+                    </div>
+                `;
+                
+                blockchainContainer.appendChild(txCard);
+            });
+        }
+        
+        function updatePerformanceMetrics() {
+            // Simulate performance data for demonstration
+            const now = new Date().toLocaleTimeString();
+            const processingSpeed = Math.floor(Math.random() * 100) + 50; // 50-150 points/sec
+            const anomalyRate = Math.random() * 10; // 0-10%
+            
+            // Add to performance data
+            performanceData.labels.push(now);
+            performanceData.processingSpeed.push(processingSpeed);
+            performanceData.anomalyRate.push(anomalyRate);
+            
+            // Keep only last 10 data points
+            if (performanceData.labels.length > 10) {
+                performanceData.labels.shift();
+                performanceData.processingSpeed.shift();
+                performanceData.anomalyRate.shift();
+            }
+            
+            // Update chart data
+            performanceChart.data.labels = performanceData.labels;
+            performanceChart.data.datasets[0].data = performanceData.processingSpeed;
+            performanceChart.data.datasets[1].data = performanceData.anomalyRate;
+            performanceChart.update();
+            
+            // Update metrics
+            const dataPointsProcessed = document.getElementById('data-points-processed');
+            const currentPoints = parseInt(dataPointsProcessed.textContent || '0');
+            dataPointsProcessed.textContent = currentPoints + processingSpeed;
+            
+            document.getElementById('processing-speed').textContent = processingSpeed + ' points/sec';
+        }
+    </script>
+</body>
+</html>

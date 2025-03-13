@@ -1,0 +1,19 @@
+{
+  "name": "pbl_2",
+  "version": "1.0.0",
+  "description": "This project implements a smart factory data processing system that combines blockchain technology with fog computing. It processes continuous flow manufacturing data, detects anomalies, and stores critical data on a blockchain for security and transparency.",
+  "main": "hardhat.config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.19"
+  }
+}

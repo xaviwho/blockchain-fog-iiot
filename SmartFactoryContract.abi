@@ -1,0 +1,124 @@
+[
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "machineId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "int256",
+				"name": "setpoint",
+				"type": "int256"
+			},
+			{
+				"indexed": false,
+				"internalType": "int256",
+				"name": "actual",
+				"type": "int256"
+			},
+			{
+				"indexed": false,
+				"internalType": "int256",
+				"name": "deviation",
+				"type": "int256"
+			}
+		],
+		"name": "AnomalyDetected",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_machineId",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "int256",
+				"name": "_setpoint",
+				"type": "int256"
+			},
+			{
+				"internalType": "int256",
+				"name": "_actual",
+				"type": "int256"
+			},
+			{
+				"internalType": "int256",
+				"name": "_deviation",
+				"type": "int256"
+			}
+		],
+		"name": "logAnomaly",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "anomalies",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "machineId",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"internalType": "int256",
+				"name": "setpoint",
+				"type": "int256"
+			},
+			{
+				"internalType": "int256",
+				"name": "actual",
+				"type": "int256"
+			},
+			{
+				"internalType": "int256",
+				"name": "deviation",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "anomalyCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
